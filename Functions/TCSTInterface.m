@@ -572,7 +572,7 @@ classdef TCSTInterface < handle
 
             if ~iscell(FileOrDir)
                 % if FileOrDir is directory
-                if isfolder(FileOrDir), 
+                if TCSTInterface.isfolder(FileOrDir), 
                     fls = dir(fullfile(FileOrDir, FileMask));
                     Files = cell(length(fls)-2, 1);
                     for ifl=1:length(fls)
@@ -940,6 +940,17 @@ classdef TCSTInterface < handle
             numRunIDs = cellfun(@(c)str2double(c{1}{1}), d);
         end
         
+        % -----------------------------------------------------------------
+        % Function for compatibility with Matlab versions below 9.3 (R2017b)
+        % -----------------------------------------------------------------
+        function Res = isfolder(DirName)
+            if verLessThan('matlab','9.3')
+                Res = isdir( TCSTInterface.GetFullPath(DirName) );
+            else
+                Res = isfolder(DirName);
+            end
+        end
+        
 %         function WriteTouchstoneFile(FileName, S, Freqs, ReferenceImpedanceOhm, strFreqUnits)
 %             % WriteTouchstoneFile(FileName, S, Freqs, [ReferenceImpedanceOhm], [strFreqUnits])
 %             %   S(NPorts,NPorts,NFreqs)
@@ -1001,7 +1012,6 @@ classdef TCSTInterface < handle
             end
         end
                 
-
         function CheckIfValueSpecified(~, varargs, iarg, ParClasses, ParAttributes, FuncName)
             % CheckIfValueSpecified(varargs, iarg)
             % CheckIfValueSpecified(varargs, iarg, classes)
@@ -1574,7 +1584,7 @@ classdef TCSTInterface < handle
             
             % make sure the directory for the script exists
             FilePath = fileparts(ScriptFile);
-            if ~isfolder(FilePath), mkdir(FilePath); end
+            if ~TCSTInterface.isfolder(FilePath), mkdir(FilePath); end
             
             % Write script content to the file ScriptFile
             fid = fopen(ScriptFile, 'w');
@@ -1610,8 +1620,6 @@ classdef TCSTInterface < handle
             end
             fclose(fid);
         end
-        
-    
     end
     
     % =====================================================================
@@ -2861,7 +2869,7 @@ classdef TCSTInterface < handle
             % If cache file is specified, save data to it
             if ~isempty(CacheFile),
                 CacheFileDir = fileparts( CacheFile );
-                if ~isfolder(CacheFileDir), mkdir(CacheFileDir); end
+                if ~TCSTInterface.isfolder(CacheFileDir), mkdir(CacheFileDir); end
                 save(CacheFile, 'D');
                 this.fprintf('The data has been saved to file "%s".\n', CacheFile);
             end
