@@ -1847,10 +1847,16 @@ classdef TCSTInterface < handle
             % if UpdateStructure is omitted, the structure will be updated  
             if nargin<4, UpdateStructure = true; end
             
+            if iscell(ParValue)
+                assert(isscalar(ParValue), 'When "ParValue" is a cell, it must be a scalar containing the parameter expression (string) or the parameter value (number).');
+                this.StoreParameter(ParName, ParValue{1}, UpdateStructure);
+                return
+            end
+            
             % store parameter ParName
-            if ischar(ParValue),
-                this.FProj.invoke('StoreParameter',ParName,ParValue);
-            elseif isnumeric(ParValue),
+            if ischar(ParValue)
+                this.FProj.invoke('StoreParameter',ParName,ParValue); 
+            elseif isnumeric(ParValue)
                 this.FProj.invoke('StoreDoubleParameter',ParName,ParValue);
             else
                 error('Wrong type of "ParValue".');
@@ -3053,6 +3059,15 @@ classdef TCSTInterface < handle
         end
         
         % -----------------------------------------------------------------
+        % It is just a wrapper to GetAllObjectNames
+        % -----------------------------------------------------------------
+        function ComponentNames = GetComponentNames(this)
+            this.CheckProjectIsOpen(true);
+            [~,ComponentNames] = this.GetAllObjectNames();
+            ComponentNames = unique(ComponentNames);
+        end
+        
+        % -----------------------------------------------------------------
         % 
         % -----------------------------------------------------------------
         function [ObjectFullNames, ObjectComponents, ObjectNames] = GetAllObjectNames(this, varargin)
@@ -3607,38 +3622,80 @@ classdef TCSTInterface < handle
         % -----------------------------------------------------------------
         % 
         % -----------------------------------------------------------------
-        function TreeItems = DisplayTreeItems(this, RootItem)
+        function varargout = DisplayTreeItems(this, RootItem)
             
             this.CheckProjectIsOpen(true);
-            if (nargin<2)||isempty(RootItem),  RootItem = '1D Results';  end
-            this.TreeItemExists(RootItem, true);
+            if (nargin<2),  RootItem = [];  end
             
-            ResultTree = this.FProj.invoke('Resulttree');
-            if nargout>0,
-                TreeItems = cell(0,1);
-            else
-                TreeItems = [];
-            end
+            [TreeItems, Levels] = this.EnumerateTreeItems(RootItem);
 
             fprintf('\n');
             n = fprintf('<strong>-------------- Result tree under "%s" ---------------</strong>\n', RootItem);
-            TreeItems = localEnumTreeItemsRecursively(ResultTree, RootItem, 0, TreeItems);
+            for k=1:length(TreeItems)
+                fprintf('%s%s\n', repmat(' | ',1,Levels(k)), TreeItems{k});
+            end
             fprintf('<strong>%s</strong>\n\n',repmat('-',1,n-18));
+            
+            % we use varargout (not directly output arguments) in order to prevent printing the TreeItems cell array if this method was called in command window without semicolon and without output args.  
+            if nargout>=1,  varargout{1} = TreeItems;  end
+            if nargout>=2,  varargout{2} = Levels;     end
+        end
+        
+        % -----------------------------------------------------------------
+        % 
+        % -----------------------------------------------------------------
+        function [TreeItems, Levels] = EnumerateTreeItems(this, varargin)
+            this.CheckProjectIsOpen(true);
+            
+            if nargin<2 || isempty(varargin{1}), RootItem = '1D Results';
+            else, RootItem = varargin{1};
+            end
+            this.TreeItemExists(RootItem, true);
+            
+            ValidArgs = { ...
+                'DoesNotHaveChildren' ...
+            };
+            funcName = 'EnumerateTreeItems';
+            iarg = 2;
+            DoesNotHaveChildren = false;
+            while iarg<=length(varargin),
+                ArgName = validatestring(varargin{iarg}, ValidArgs, funcName, '', iarg);
+                switch ArgName,
+                    case 'DoesNotHaveChildren',
+                        this.CheckIfValueSpecified(varargin,iarg, {'logical'});
+                        DoesNotHaveChildren = varargin{iarg+1};
+                        iarg = iarg+2;  
+                end
+            end
 
-            function TreeItems = localEnumTreeItemsRecursively(ResultTree, RootItem, Level, TreeItems)
+            TreeItems = cell(0,1);
+            Levels = nan(500,1);
+            ResultTree = this.FProj.invoke('Resulttree');
+            [TreeItems, Levels] = localEnumTreeItemsRecursively(ResultTree, RootItem, 0, TreeItems, Levels);
+            Levels(isnan(Levels)) = [];
+            
+            if DoesNotHaveChildren
+                NItems = length(TreeItems);
+                iItemsToRemove = false(NItems,1);
+                for n=1:NItems-1
+                    iItemsToRemove(n) = Levels(n+1)>Levels(n);
+                end
+                TreeItems(iItemsToRemove) = [];
+                Levels(iItemsToRemove) = [];
+            end
+
+            function [TreeItems, Levels] = localEnumTreeItemsRecursively(ResultTree, RootItem, Level, TreeItems, Levels)
                 if isempty(RootItem), return; end
                 TreeItem = ResultTree.invoke('GetFirstChildName',RootItem);
                 while ~isempty(TreeItem),
-                    if iscell(TreeItems), % if output argument is required, save items in the cell array
-                        TreeItems{end+1,1} = TreeItem; %#ok<AGROW>
-                    end
-                    fprintf('%s%s\n', repmat(' | ',1,Level), TreeItem);
-                    TreeItems = localEnumTreeItemsRecursively(ResultTree, TreeItem, Level+1, TreeItems);
+                    TreeItems{end+1,1} = TreeItem; %#ok<AGROW>
+                    Levels(length(TreeItems)) = Level;
+                    [TreeItems, Levels] = localEnumTreeItemsRecursively(ResultTree, TreeItem, Level+1, TreeItems, Levels);
                     TreeItem = ResultTree.invoke('GetNextItemName',TreeItem);
                 end
             end
-            
         end
+        
         
         % -----------------------------------------------------------------
         % Gets/prints the license HostID and Customer number. It may be 
@@ -3777,13 +3834,28 @@ classdef TCSTInterface < handle
             Units              = UnitsObj.invoke(QuantitiesAndAPIs{ind,2});
             ConversionCoefToSI = UnitsObj.invoke(QuantitiesAndAPIs{ind,3});
         end
-%         
-%         % -----------------------------------------------------------------
-%         % 
-%         % -----------------------------------------------------------------
-%         function (this)
-%             
-%         end
+        
+        % -----------------------------------------------------------------
+        % 
+        % -----------------------------------------------------------------
+        function [ParamNames, ParamValues, ParamMinMax, ParamInitValues] = GetOptimizerVaryingParameters(this)
+            this.CheckProjectIsOpen(true);
+            
+            OptObj = this.FProj.invoke('Optimizer');
+            NParams = OptObj.invoke('GetNumberOfVaryingParameters');
+            ParamNames      = cell(NParams,1);
+            ParamInitValues = nan(NParams,1);
+            ParamMinMax     = nan(NParams,2);
+            ParamValues     = nan(NParams,1);
+            for ip=1:NParams
+                ParamNames{ip}      = OptObj.invoke('GetNameOfVaryingParameter',ip-1);
+                ParamInitValues(ip) = OptObj.invoke('GetParameterInitOfVaryingParameter',ip-1);
+                ParamMinMax(ip,1)   = OptObj.invoke('GetParameterMinOfVaryingParameter',ip-1);
+                ParamMinMax(ip,2)   = OptObj.invoke('GetParameterMaxOfVaryingParameter',ip-1);
+                ParamValues(ip)     = OptObj.invoke('GetValueOfVaryingParameter',ip-1);
+            end
+            
+        end
 %         
 %         % -----------------------------------------------------------------
 %         % 

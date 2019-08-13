@@ -1,0 +1,389 @@
+{
+  "_schemaVersion": "1.0.0",
+  "TCSTInterface":
+  {
+     "platforms":"win32,win64",
+     "inputs":
+     [
+        {"name":"ProjectFile", "kind":"ordered", "type":["file=*.cst"],"purpose":"CST project"}
+     ]
+  },
+  "TCSTInterface.OpenProject":
+  {
+     "inputs":
+     [
+		{"name":"this", 		"kind":"required", 	"type":"TCSTInterface"},
+        {"name":"FullFileName", "kind":"ordered", 	"type":["file=*.cst"],"purpose":"CST project"}
+     ]
+  },
+  "TCSTInterface.CloseProject":
+  {
+     "inputs":
+     [
+		{"name":"this", 		"kind":"required", 	"type":"TCSTInterface"},
+        {"name":"FullFileName", "kind":"ordered", 	"type":["file=*.cst"],"purpose":"CST project"},
+		{"name":"SaveProject", 	"kind":"ordered", 	"type":["logical","scalar"], "default":"false"}
+     ]
+  },
+  "TCSTInterface.ChangeParameter":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParName", 			"kind":"required", "type":["char","choices=this.GetParameterList"], "purpose":"Parameter name"},
+        {"name":"ParValue", 		"kind":"required", "type":[["numeric"],["char"]], 	"purpose":"Parameter value"},
+		{"name":"UpdateStructure", 	"kind":"ordered",  "type":["logical","scalar"], 	"default":"true"}
+     ]
+  },
+  "TCSTInterface.ChangeParameters":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParNames", 		"kind":"required", "type":[["char"],["cellstr"]], 	"purpose":"Parameter names"},
+        {"name":"ParValues", 		"kind":"required", "type":[["numeric"],["cell"]], 	"purpose":"Parameter values"},
+		{"name":"UpdateStructure", 	"kind":"ordered",  "type":["logical","scalar"], 	"default":"true"}
+     ]
+  },
+  "TCSTInterface.StoreParameter":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParName", 			"kind":"required", "type":["char"], 				"purpose":"Parameter name"},
+        {"name":"ParValue", 		"kind":"required", "type":[["numeric"],["char"]], 	"purpose":"Parameter value"},
+		{"name":"UpdateStructure", 	"kind":"ordered",  "type":["logical","scalar"], 	"default":"true"}
+     ]
+  },
+  "TCSTInterface.StoreParameterWithDescription":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParName", 			"kind":"required", "type":["char"], 				"purpose":"Parameter name"},
+        {"name":"ParValue", 		"kind":"required", "type":[["numeric"],["char"]], 	"purpose":"Parameter value"},
+		{"name":"ParDescription", 	"kind":"required", "type":["char"], 				"purpose":"Parameter description"},
+		{"name":"UpdateStructure", 	"kind":"ordered",  "type":["logical","scalar"], 	"default":"true"}
+     ]
+  },
+  "TCSTInterface.ParameterExists":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParName", 			"kind":"required", "type":["char"], 			"purpose":"Parameter name"},
+		{"name":"ThrowErrorIfNot", 	"kind":"ordered",  "type":["logical","scalar"], "default":"false"}
+     ]
+  },
+  "TCSTInterface.GetParameterNameByIndex":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParamIndex", 		"kind":"required", "type":["integer","scalar",">=1"], "purpose":"Parameter index"}
+     ]
+  },
+  "TCSTInterface.GetParameterIndexByName":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParamName", 		"kind":"required", "type":["char","choices=this.GetParameterList"], "purpose":"Parameter name"}
+     ]
+  },
+  "TCSTInterface.GetParameterValue":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParamNameOrIndex",	"kind":"required", "type":[["char","choices=this.GetParameterList"],["integer","scalar",">=1"]], "purpose":"Parameter name or index"}
+     ]
+  },
+  "TCSTInterface.GetParameterExpression":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ParamNameOrIndex",	"kind":"required", "type":[["char","choices=this.GetParameterList"],["integer","scalar",">=1"]], "purpose":"Parameter name or index"}
+     ]
+  },
+  "TCSTInterface.CopyAllParametersToMatlabWorkspace":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", "type":"TCSTInterface"},
+		{"name":"Workspace",	"kind":"ordered",  "type":["char","choices={'base','caller'}"], "default":"'caller'"}
+     ]
+  },
+  "TCSTInterface.Solve":
+  {
+     "inputs":
+     [
+		{"name":"this",    				"kind":"required",  "type":"TCSTInterface"},
+		{"name":"SkipIfSolutionExists",	"kind":"namevalue", "type":["logical","scalar"], 		"default":"false"},
+		{"name":"NumberOfTries",		"kind":"namevalue", "type":["integer","scalar",">=1"], 	"default":"1"}
+     ]
+  },
+  "TCSTInterface.GetResultIDsFromTreeItem":
+  {
+     "inputs":
+     [
+		{"name":"this",    	"kind":"required", "type":"TCSTInterface"},
+		{"name":"TreeItem", "kind":"required", "type":[["char","choices=this.EnumerateTreeItems([],'DoesNotHaveChildren',true)"],["char"]], "purpose":"Tree item name"}
+     ]
+  },
+  "TCSTInterface.GetSParams":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", 	  "type":"TCSTInterface"},
+		{"name":"RunIDFilter", 	"kind":"positional",  "type":[["char"],["integer"]], "purpose":"RunID filter"},
+		{"name":"iRows",		"kind":"positional",  "type":["integer",">=1"]},
+		{"name":"iCols",		"kind":"positional",  "type":["integer",">=1"]},
+		{"name":"PortMode",		"kind":"positional",  "type":["integer","scalar",">=1"]},
+		{"name":"FreqsToGet",	"kind":"positional",  "type":["numeric","vector"]}
+     ]
+  },
+  "TCSTInterface.GetZParams":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", 	  "type":"TCSTInterface"},
+		{"name":"RunIDFilter", 	"kind":"positional",  "type":[["char"],["integer"]], "purpose":"RunID filter"},
+		{"name":"iRows",		"kind":"positional",  "type":["integer",">=1"]},
+		{"name":"iCols",		"kind":"positional",  "type":["integer",">=1"]},
+		{"name":"PortMode",		"kind":"positional",  "type":["integer","scalar",">=1"]},
+		{"name":"FreqsToGet",	"kind":"positional",  "type":["numeric","vector"]}
+     ]
+  },
+  "TCSTInterface.GetParameterCombination":
+  {
+     "inputs":
+     [
+		{"name":"this",   	"kind":"required",	"type":"TCSTInterface"},
+		{"name":"RunIDs", 	"kind":"ordered",	"type":[["char"],["integer"]], "purpose":"RunIDs"}
+     ]
+  },
+  "TCSTInterface.FindResultIDsForParameterCombination":
+  {
+     "inputs":
+     [
+		{"name":"this",   		"kind":"required",	"type":"TCSTInterface"},
+		{"name":"ParamNames", 	"kind":"required", "type":[["char"],["cellstr"]], 	"purpose":"Parameter names"},
+        {"name":"ParamValues", 	"kind":"required", "type":["numeric"], 				"purpose":"Parameter values"}
+     ]
+  },
+  "TCSTInterface.ExportTouchstone":
+  {
+     "inputs":
+     [
+		{"name":"this",   					"kind":"required",		"type":"TCSTInterface"},
+		{"name":"FileName", 				"kind":"required", 		"type":[["file=*.s*p"],["char"]]},
+        {"name":"NormalizationImpedance", 	"kind":"positional", 	"type":["numeric","scalar"]},
+		{"name":"NumberOfSamples", 			"kind":"positional", 	"type":["integer","scalar",">=1"]},
+		{"name":"FreqRange", 				"kind":"positional", 	"type":[["numeric","size=1,2",">0"],["char","choices={'Full'}"]]}
+     ]
+  },
+  "TCSTInterface.ExportFarField":
+  {
+     "inputs":
+     [
+		{"name":"this",   				"kind":"required",		"type":"TCSTInterface"},
+		{"name":"OutputFileName", 		"kind":"positional", 	"type":[["@(x)isempty(x)"],["char"]]},
+        {"name":"SaveBroadband", 		"kind":"positional", 	"type":[["@(x)isempty(x)"],["logical","scalar"]]},
+		{"name":"ThetaPhiStepDeg", 		"kind":"positional", 	"type":[["@(x)isempty(x)"],["numeric","size=1,2",">0"]]},
+		{"name":"NormalizationType", 	"kind":"positional", 	"type":[["@(x)isempty(x)"],["char","choices={'None', 'Gain', 'RealizedGain', 'Directivity', 'Unity'}"]]},
+		{"name":"SaveToMat", 			"kind":"positional", 	"type":[["@(x)isempty(x)"],["logical","scalar"]]}
+     ]
+  },
+  "TCSTInterface.TreeItemExists":
+  {
+     "inputs":
+     [
+		{"name":"this",    				"kind":"required", "type":"TCSTInterface"},
+		{"name":"TreeItem", 			"kind":"required", "type":["char"]},
+		{"name":"ThrowErrorIfNotExist", "kind":"ordered",  "type":["logical","scalar"], "default":"false"}
+     ]
+  },
+  "TCSTInterface.Get1DResultFromTreeItem":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", 		"type":"TCSTInterface"},
+		{"name":"TreeItem", 	"kind":"required", 		"type":[["char","choices=this.EnumerateTreeItems([],'DoesNotHaveChildren',true)"],["char"]]},
+		{"name":"RunIDFilter", 	"kind":"ordered",  		"type":[["cell"],["char","choices=this.GetResultIDsFromTreeItem(TreeItem)"]]},
+		{"name":"QueryX", 		"kind":"positional", 	"type":[["@(x)isempty(x)"],["numeric","vector"]]}
+     ]
+  },
+  "TCSTInterface.ReadParametricResults":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required",  "type":"TCSTInterface"},
+		{"name":"ResultsToRead",	"kind":"required", 	"type":[["cell"],["char","choices=this.EnumerateTreeItems([],'DoesNotHaveChildren',true)"],["char"]]},
+		{"name":"VarNames",			"kind":"namevalue", "type":[["cell"],["char"]]},
+		{"name":"CacheFile",		"kind":"namevalue", "type":[["file"],["char"]]},
+		{"name":"SplitParameters",	"kind":"namevalue", "type":["logical","scalar"], 	"default":"false"},
+		{"name":"QueryX",			"kind":"namevalue", "type":["numeric","vector"]}
+     ]
+  },
+  "TCSTInterface.MonitorExists":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", "type":"TCSTInterface"},
+		{"name":"MonitorName", 	"kind":"required", "type":["char"]}
+     ]
+  },
+  "TCSTInterface.AddMonitorFreqDomain":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", "type":"TCSTInterface"},
+		{"name":"FieldType", 	"kind":"required", "type":["char","choices={'Efield','Hfield','Powerflow','Current','Powerloss','Eenergy','Henergy','Farfield','Fieldsource','Spacecharge','Particlecurrentdensity'}"]},
+		{"name":"Freq",			"kind":"required", "type":["numeric","scalar",">0"]}
+	 ]
+  },
+  "TCSTInterface.GetAllObjectNames":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", "type":"TCSTInterface"},
+		{"name":"Component",	"kind":"namevalue", "type":[["cell"],["char","choices=this.GetComponentNames()"]]},
+		{"name":"Include",		"kind":"namevalue", "type":[["cell"],["char"]]},
+		{"name":"Exclude",		"kind":"namevalue", "type":[["cell"],["char"]]}
+     ]
+  },
+  "TCSTInterface.ObjectExist":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", "type":"TCSTInterface"},
+		{"name":"ObjectFullNames", 	"kind":"required", "type":["char"]},
+		{"name":"ThrowErrorIfNot", 	"kind":"ordered",  "type":["logical","scalar"], "default":"false"}
+     ]
+  },
+  "TCSTInterface.GetObjectsVolume":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"ObjectFullNames", 	"kind":"ordered", 	"type":[["cell"],["char","choices=this.GetAllObjectNames()"]]}
+     ]
+  },
+  "TCSTInterface.GetObjectsMass":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"ObjectFullNames", 	"kind":"ordered", 	"type":[["cell"],["char","choices=this.GetAllObjectNames()"]]}
+     ]
+  },
+  "TCSTInterface.GetObjectsMaterial":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"ObjectFullNames", 	"kind":"ordered", 	"type":[["cell"],["char","choices=this.GetAllObjectNames()"]]}
+     ]
+  },
+  "TCSTInterface.GetObjectColors":
+  {
+     "inputs":
+     [
+		{"name":"this",    			"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"ObjectFullNames", 	"kind":"ordered", 	"type":[["cell"],["char","choices=this.GetAllObjectNames()"]]}
+     ]
+  },
+  "TCSTInterface.WireFrame":
+  {
+     "inputs":
+     [
+		{"name":"this",   	"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"State",	"kind":"ordered", 	"type":["logical","scalar"]}
+	 ]
+  },
+  "TCSTInterface.GradientBackground":
+  {
+     "inputs":
+     [
+		{"name":"this",   	"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"State",	"kind":"ordered", 	"type":["logical","scalar"]}
+	 ]
+  },
+  "TCSTInterface.ExportImage":
+  {
+     "inputs":
+     [
+		{"name":"this",    	"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"FileName", "kind":"required", 	"type":["file=*.bmp,*.jpeg,*.png"]},
+		{"name":"WidthPx",	"kind":"ordered", 	"type":["numeric","scalar",">0"], "default":"800"},
+		{"name":"HeightPx",	"kind":"ordered", 	"type":["numeric","scalar",">0"], "default":"600"}
+	 ]
+  },
+  "TCSTInterface.SelectTreeItem":
+  {
+     "inputs":
+     [
+		{"name":"this",    	"kind":"required", "type":"TCSTInterface"},
+		{"name":"TreeItem", "kind":"required", "type":[["char","choices=this.EnumerateTreeItems()"],["char"]]}
+     ]
+  },
+  "TCSTInterface.SetView":
+  {
+     "inputs":
+     [
+		{"name":"this",  "kind":"required", "type":"TCSTInterface"},
+		{"name":"sView", "kind":"required", "type":[["numeric","size=1,2",">=-360","<=360"],["char","choices={'Left','Right','Front','Back','Top','Bottom','Perspective','Nearest Axis', 'ZoomToStructure'}"]]}
+     ]
+  },
+  "TCSTInterface.ExportObjectsToSTL":
+  {
+     "inputs":
+     [
+		{"name":"this",    					"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"STLFileName", 				"kind":"required", 	"type":[["file=*.stl"],["char"]]},
+		{"name":"AppendColorsToObjName",	"kind":"namevalue", "type":["logical","scalar"], "default":"false"},
+		{"name":"ExportUnits",				"kind":"namevalue", "type":["char","choices={'m','cm','mm','um','ft','in','mil'}"], "default":"'mm'"},
+		{"name":"NormalTolerance",			"kind":"namevalue", "type":["numeric","scalar",">=1","<=43"]},
+		{"name":"SurfaceTolerance",			"kind":"namevalue", "type":["numeric","scalar",">=0.00001","<=0.1"]}
+	 ]
+  },
+  "TCSTInterface.DisplayTreeItems":
+  {
+     "inputs":
+     [
+		{"name":"this",    	"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"RootItem", "kind":"required", 	"type":[["char","choices=this.EnumerateTreeItems()"],["char"]]}
+	 ]
+  },
+  "TCSTInterface.EnumerateTreeItems":
+  {
+     "inputs":
+     [
+		{"name":"this",    				"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"RootItem", 			"kind":"required", 	"type":[["char","choices=this.EnumerateTreeItems()"],["char"]]},
+		{"name":"DoesNotHaveChildren",	"kind":"namevalue", "type":["logical","scalar"], "default":"false"}
+	 ]
+  },
+  "TCSTInterface.SetMatlabCostFunction":
+  {
+     "inputs":
+     [
+		{"name":"this",    		"kind":"required", 	"type":"TCSTInterface"},
+		{"name":"CostFunction", "kind":"required", 	"type":["matlabpathfile=*.m,*.p"]}
+	 ]
+  },
+  "TCSTInterface.GetProjectUnits":
+  {
+     "inputs":
+     [
+		{"name":"this",    	"kind":"required",	"type":"TCSTInterface"},
+		{"name":"Quantity",	"kind":"required", 	"type":[["char","choices={'Length','Time','Frequency','Voltage','Current','Resistance','Conductance','Capacitance','Inductance','Temperature'}"],["cell"]], "default":"[]"}
+	 ]
+  }
+  
+  
+  
+  
+}

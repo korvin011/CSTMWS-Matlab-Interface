@@ -54,7 +54,7 @@ If other functionality is desired, please post a feature request [here](https://
 
 # Demos / Documentation
 
-All functionalities are well documented in the included Live Script demos.
+All functionalities are well documented in the included Live Script demos. MATLAB R2018a or higher is desired in order to not loose code samples in the demos.
 
 # Bugs found?
 
